@@ -1,6 +1,5 @@
 import 'package:face_chat/app_extentions.dart';
 import 'package:face_chat/controllers/auth_controller.dart';
-import 'package:face_chat/controllers/connection_controller.dart';
 import 'package:face_chat/model/user_model.dart';
 import 'package:face_chat/screens/login_screen.dart';
 import 'package:face_chat/services/firebase_services.dart';

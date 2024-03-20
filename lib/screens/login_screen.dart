@@ -10,7 +10,6 @@ import 'package:face_chat/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../services/firebase_services.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controllers/auth_controller.dart';
-import '../services/firebase_services.dart';
 import '../utils.dart';
 import '../widgets/button.dart';
 import '../widgets/input_field.dart';
