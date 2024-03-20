@@ -22,9 +22,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
-  final ConnectionController connectionController = Get.put(ConnectionController());
+  final ConnectionController connectionController =
+      Get.put(ConnectionController());
   final AuthController authController = Get.put(AuthController());
-  final GlobalKey<FormState> _formKey= GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -32,24 +33,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         title: Text("Register"),
       ),
-      bottomNavigationBar: FormButton(
+      bottomNavigationBar: Obx(
+        () => FormButton(
           buttonText: "Register",
           color: Colors.blue,
           onTap: () async {
-            if(_formKey.currentState!.validate()){
+            if (_formKey.currentState!.validate()) {
+              authController.isLoading.value = true;
               await authController
                   .createUser(
-                  email: emailController.text,
-                  password: passwordController.text,
-                  name: nameController.text)
+                      email: emailController.text,
+                      password: passwordController.text,
+                      name: nameController.text)
                   .whenComplete(() {
-                  withoutBack(context: context, screen: ConnectionsScreen());})
-                  .catchError((e) => Get.showSnackbar(GetSnackBar(
-                message: e.toString(),
-              )));
+                authController.isLoading.value = false;
+                withoutBack(context: context, screen: ConnectionsScreen());
+              }).catchError((e) {
+                Get.showSnackbar(GetSnackBar(
+                  message: e.toString(),
+                ));
+                authController.isLoading.value = false;
+              });
             }
           },
-          width: context.screenWidth() * 0.8),
+          width: context.screenWidth() * 0.8,
+          isLoading: authController.isLoading.value,
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -62,62 +72,92 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Expanded(
             flex: 4,
             child: Form(
-              key: _formKey,
+                key: _formKey,
                 child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: ListView(
-                children: [
-                  SizedBox(
-                    height: context.screenHeight() * 0.05,
-                  ),
-                  InputField(
-                    label: "Enter Your Name",
-                    controller: nameController,
-                    horizontalPadding: context.screenWidth() * 0.05,
-                    type: TextInputType.name,
-                  ),
-                  SizedBox(
-                    height: context.screenHeight() * 0.05,
-                  ),
-                  InputField(
-                    label: "Enter Your Email",
-                    controller: emailController,
-                    horizontalPadding: context.screenWidth() * 0.05,
-                    type: TextInputType.emailAddress,
-                  ),
-                  SizedBox(
-                    height: context.screenHeight() * 0.05,
-                  ),
-                  InputField(
-                    label: "Enter Your Password",
-                    controller: passwordController,
-                    horizontalPadding: context.screenWidth() * 0.05,
-                    type: TextInputType.visiblePassword,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: ListView(
                     children: [
-                      Text("Already have an account?"),
-                      TextButton(
-                          onPressed: () {
-                            withoutBack(
-                                context: context, screen: LoginScreen());
-                          },
-                          child: Text(
-                            "Login",
-                            style: TextStyle(
-                                color: Colors.blue,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold),
-                          ))
+                      SizedBox(
+                        height: context.screenHeight() * 0.05,
+                      ),
+                      InputField(
+                        label: "Enter Your Name",
+                        controller: nameController,
+                        horizontalPadding: context.screenWidth() * 0.05,
+                        type: TextInputType.name,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(
+                        height: context.screenHeight() * 0.05,
+                      ),
+                      InputField(
+                        label: "Enter Your Email",
+                        controller: emailController,
+                        horizontalPadding: context.screenWidth() * 0.05,
+                        type: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!isEmailValid(value)) {
+                            return 'Please enter a valid email address';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(
+                        height: context.screenHeight() * 0.05,
+                      ),
+                      InputField(
+                        label: "Enter Your Password",
+                        controller: passwordController,
+                        horizontalPadding: context.screenWidth() * 0.05,
+                        type: TextInputType.visiblePassword,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          if (value.length < 8) {
+                            return 'Password must be at least 8 characters long';
+                          }
+                          if (!containsUppercase(value)) {
+                            return 'Password must contain at least one uppercase letter';
+                          }
+                          if (!containsSymbol(value)) {
+                            return 'Password must contain at least one symbol';
+                          }
+                          return null;
+                        },
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Already have an account?"),
+                          TextButton(
+                              onPressed: () {
+                                withoutBack(
+                                    context: context, screen: LoginScreen());
+                              },
+                              child: Text(
+                                "Login",
+                                style: TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold),
+                              ))
+                        ],
+                      ),
+                      SizedBox(
+                        height: context.screenHeight() * 0.08,
+                      ),
                     ],
                   ),
-                  SizedBox(
-                    height: context.screenHeight() * 0.08,
-                  ),
-                ],
-              ),
-            )),
+                )),
           ),
         ],
       ),

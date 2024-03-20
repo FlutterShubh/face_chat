@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:get/get_rx/get_rx.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 
@@ -9,12 +10,12 @@ import '../model/user_model.dart';
 import '../services/firebase_services.dart';
 
 class AuthController extends GetxController{
-  Future<bool> loginUser(
+  RxBool isLoading = false.obs;
+  Future loginUser(
       {required String email, required String password}) async {
     UserCredential? userCredential =
     await FirebaseServices.signIn(email: email, password: password);
     onUserLogin(userCredential?.user?.uid ?? "", email);
-    return userCredential != null ? true : false;
   }
 
   Future<void> createUser(

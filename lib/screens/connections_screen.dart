@@ -1,4 +1,3 @@
-
 import 'package:face_chat/app_extentions.dart';
 import 'package:face_chat/controllers/auth_controller.dart';
 import 'package:face_chat/controllers/connection_controller.dart';
@@ -20,8 +19,7 @@ class ConnectionsScreen extends StatefulWidget {
 }
 
 class _ConnectionsScreenState extends State<ConnectionsScreen> {
-  final AuthController authController =
-      Get.put(AuthController());
+  final AuthController authController = Get.put(AuthController());
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +31,16 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
           child: ListView(
             children: [
               FutureBuilder(
-                future: FirebaseServices.getCurrentUser(FirebaseAuth.instance.currentUser?.uid??""),
+                future: FirebaseServices.getCurrentUser(
+                    FirebaseAuth.instance.currentUser?.uid ?? ""),
                 builder: (context, snapshot) => UserAccountsDrawerHeader(
+                    currentAccountPicture: CircleAvatar(
+                      child: Text(
+                        snapshot.data?.name![0].toUpperCase() ?? "A",
+                        style:
+                            const TextStyle(fontSize: 25, color: Colors.blue),
+                      ),
+                    ),
                     accountName: Text(snapshot.data?.name ?? "Name"),
                     accountEmail: Text((snapshot.data?.userName ?? "Email"))),
               ),
@@ -42,10 +48,27 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
                   leading: Icon(Icons.logout),
                   title: Text("Logout"),
                   trailing: Icon(Icons.navigate_next),
-                  onTap: () => FirebaseServices.auth.signOut().then((value) {
-                        authController.onUserLogout();
-                        Get.offAll(() => LoginScreen());
-                      }))
+                  onTap: () {
+                    showDialog(context: context, builder: (context) {
+                      return AlertDialog(
+                        title: Text("Logout"),
+                        content: Text("Are you sure you want to logout?"),
+                        actions: [
+                          TextButton(onPressed: () {
+                            Get.back();
+                          }, child: Text("No")),
+                          TextButton(onPressed: () {
+                            FirebaseServices.auth.signOut().then((value) {
+                              authController.onUserLogout();
+                              Get.offAll(() => LoginScreen());
+                            });
+                            Get.back();
+                          }, child: Text("Yes")),
+                        ],
+                      );
+                    },);
+
+                  })
             ],
           ),
         ),
@@ -54,13 +77,14 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
           // Replace with your actual stream function
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator()); // Show a loading indicator while data is being fetched
+              return Center(
+                  child:
+                      CircularProgressIndicator()); // Show a loading indicator while data is being fetched
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (!snapshot.hasData) {
               return Center(
-                child: Text(
-                    'No users found.'),
+                child: Text('No users found.'),
               ); // Display a message if no users are available
             } else {
               // Display your UI components using the user data (snapshot.data)
@@ -70,10 +94,10 @@ class _ConnectionsScreenState extends State<ConnectionsScreen> {
                   final user = snapshot.data![index];
                   if (FirebaseServices().userId != user.userID) {
                     return ConnectionDesign(
-                      space: context.screenWidth() * 0.03,
-                      model: user,
-                      onCallFinished: authController.onSendCallInvitationFinished
-                    );
+                        space: context.screenWidth() * 0.03,
+                        model: user,
+                        onCallFinished:
+                            authController.onSendCallInvitationFinished);
                   } else {
                     return SizedBox.shrink();
                   }

@@ -7,12 +7,14 @@ class InputField extends StatefulWidget {
       required this.label,
       required this.controller,
       required this.horizontalPadding,
-      required this.type});
+      required this.type,
+      required this.validator});
 
   final String label;
   final TextEditingController controller;
   final double horizontalPadding;
   final TextInputType type;
+  final String? Function(String? value) validator;
 
   @override
   State<InputField> createState() => _InputFieldState();
@@ -32,12 +34,7 @@ class _InputFieldState extends State<InputField> {
               borderRadius: BorderRadius.circular(15),
             )),
         keyboardType: widget.type,
-        validator: (value) {
-          if(value!.isEmpty){
-            return "Please ${widget.label}";
-          }
-          return null;
-        },
+        validator: widget.validator
       ),
     );
   }
